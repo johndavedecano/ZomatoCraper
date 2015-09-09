@@ -1,0 +1,18 @@
+{
+    "name": "jdecano/zomato-scraper",
+    "description": "Scrapes Zomato Site",
+    "authors": [
+        {
+            "name": "JOhn Dave Decano",
+            "email": "pasigweb@gmail.com"
+        }
+    ],
+    "require": {
+        "fabpot/goutte": "^3.1"
+    },
+    "autoload": {
+      "psr-4": {
+        "Jdecano\\ZomatoScraper\\": "src"
+      }
+    }
+}
