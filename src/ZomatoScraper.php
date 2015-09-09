@@ -83,8 +83,6 @@ class ZomatoScraper {
 
         $this->data = $data;
 
-        print_r($data);
-
         return $this->data;
     }
 
