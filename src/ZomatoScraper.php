@@ -9,7 +9,6 @@
 namespace Jdecano;
 use Goutte\Client;
 use Jdecano\Exceptions\CityNotFoundException;
-use League\Csv\Writer;
 /**
  * Class ZomatoScraper
  * @package Jdecano
@@ -41,29 +40,21 @@ class ZomatoScraper {
      */
     private $data = [];
     /**
-     * [$path description]
+     * [$limit description]
      * @var string
      */
-    private $path;
+    private $limit;
 
     /**
      * @param string $city
-     * @param string $path
+     * @param string $limit
      */
-    public function __construct($city = '', $path = '') {
+    public function __construct($city = '', $limit = false) {
         $this->setBase($city);
         $this->client = $this->setClient();
         $this->total = $this->getTotalPages();
         $this->pages = $this->getPages($this->total);
-        $this->path = $path;
-    }
-    /**
-     * @param array $data
-     * @return void
-     */
-    private function write(array $data) {
-        $writer = Writer::createFromPath(new SplFileObject($this->path, 'a+'), 'w');
-        $writer->insertOne($data);
+        $this->limit = $limit;
     }
     /**
      * @param $total
@@ -78,7 +69,9 @@ class ZomatoScraper {
         foreach($range as $page) {
             $pages[] = $this->base.'?page='.$page;
         }
-
+        if (is_int($this->limit)) {
+            $pages = array_slice($pages, 0, $this->limit);
+        }
         return $pages;
     }
 
@@ -151,10 +144,6 @@ class ZomatoScraper {
         $crawler->filterXPath('//*[@id="tabtop"]/div/div/div/div/div/a/img')->each(function ($node) use(&$data) {
             $data['photos'][] = $node->attr('data-original');
         });
-
-        if ($this->path != '') {
-            $this->writeToCsv($data);
-        }
 
         return $data;
     }
@@ -229,7 +218,10 @@ class ZomatoScraper {
      */
     private function cityExists($url) {
         $headers = @get_headers($url);
-        if(strpos($headers[0],'200')===false)return false;
+        if(strpos($headers[0],'404') === false) {
+          return true;
+        }
+        return false;
     }
 
     /**

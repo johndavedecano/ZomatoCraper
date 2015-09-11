@@ -3,9 +3,9 @@ Scrapes zomato website
 
 ```
 // First Parameter is the city that you want to crawl 
-// Seond Parameter is the csv file path
-$scraper = new \Jdecano\ZomatoScraper('melbourne', __DIR__.'/example.csv');
+// Second is limit
+$scraper = new \Jdecano\ZomatoScraper('melbourne', 10);
 // Process still returns the whole array of data
-$scraper->process();
-exit;
+header('Content-Type: application/json');
+echo json_encode($scraper->process());
 ```
