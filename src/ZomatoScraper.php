@@ -9,7 +9,7 @@
 namespace Jdecano;
 use Goutte\Client;
 use Jdecano\Exceptions\CityNotFoundException;
-
+use League\Csv\Writer;
 /**
  * Class ZomatoScraper
  * @package Jdecano
@@ -40,17 +40,31 @@ class ZomatoScraper {
      * @var array
      */
     private $data = [];
+    /**
+     * [$path description]
+     * @var string
+     */
+    private $path;
 
     /**
      * @param string $city
+     * @param string $path
      */
-    public function __construct($city = '') {
+    public function __construct($city = '', $path = '') {
         $this->setBase($city);
         $this->client = $this->setClient();
         $this->total = $this->getTotalPages();
         $this->pages = $this->getPages($this->total);
+        $this->path = $path;
     }
-
+    /**
+     * @param array $data
+     * @return void
+     */
+    private function write(array $data) {
+        $writer = Writer::createFromPath(new SplFileObject($this->path, 'a+'), 'w');
+        $writer->insertOne($data);
+    }
     /**
      * @param $total
      * @return array
@@ -82,7 +96,6 @@ class ZomatoScraper {
         }
 
         $this->data = $data;
-
         return $this->data;
     }
 
@@ -138,6 +151,10 @@ class ZomatoScraper {
         $crawler->filterXPath('//*[@id="tabtop"]/div/div/div/div/div/a/img')->each(function ($node) use(&$data) {
             $data['photos'][] = $node->attr('data-original');
         });
+
+        if ($this->path != '') {
+            $this->writeToCsv($data);
+        }
 
         return $data;
     }
