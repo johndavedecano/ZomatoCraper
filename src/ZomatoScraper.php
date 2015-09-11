@@ -41,15 +41,13 @@ class ZomatoScraper {
     private $data = [];
     /**
      * [$limit description]
-     * @var string
+     * @var int
      */
     private $limit;
-
     /**
      * @param string $city
-     * @param string $limit
      */
-    public function __construct($city = '', $limit = false) {
+    public function __construct($city = '', $limit = 1) {
         $this->setBase($city);
         $this->client = $this->setClient();
         $this->total = $this->getTotalPages();
@@ -69,8 +67,8 @@ class ZomatoScraper {
         foreach($range as $page) {
             $pages[] = $this->base.'?page='.$page;
         }
-        if (is_int($this->limit)) {
-            $pages = array_slice($pages, 0, $this->limit);
+        if ($this->limit > 0) {
+            $pages = array_slice($pages, 0, 5);
         }
         return $pages;
     }
@@ -159,8 +157,6 @@ class ZomatoScraper {
             $restaurants[] = $this->extractRestaurants($page);
         }
 
-        //$restaurants[] = $this->extractRestaurants($this->pages[0]);
-
         return $restaurants;
 
     }
@@ -204,24 +200,7 @@ class ZomatoScraper {
      */
     private function setBase($city) {
         $this->base = 'https://www.zomato.com/'.$city.'/restaurants';
-
-        if (!$this->cityExists($this->base)) {
-            throw new CityNotFoundException("Given city does not exists.");
-        }
-
         return $this;
-    }
-
-    /**
-     * @param $url
-     * @return bool
-     */
-    private function cityExists($url) {
-        $headers = @get_headers($url);
-        if(strpos($headers[0],'404') === false) {
-          return true;
-        }
-        return false;
     }
 
     /**
